@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festas do Verão</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            min-height: 100vh;
+            line-height: 1.4;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .logo i {
+            color: #007aff;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: #86868b;
+            font-weight: 400;
+        }
+        
+        /* Modal de login */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            padding: 32px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+        }
+        
+        .modal-subtitle {
+            color: #86868b;
+            margin-bottom: 24px;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+        
+        .modal-input:focus {
+            outline: none;
+            border-color: #007aff;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+        
+        .modal-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        
+        .modal-btn:hover {
+            background-color: #0056cc;
+        }
+        
+        /* Status do usuário */
+        .user-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #007aff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        .logout-btn {
+            background-color: transparent;
+            color: #ff3b30;
+            border: 1px solid #ff3b30;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background-color: rgba(255, 59, 48, 0.05);
+        }
+        
+        /* Conteúdo principal */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+        
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: #007aff;
+        }
+        
+        /* Formulário de nova festa */
+        .party-form {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+        }
+        
+        input[type="text"], input[type="date"], textarea {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            background-color: #fff;
+            transition: all 0.2s;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #007aff;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+        
+        .btn {
+            background-color: #007aff;
+            color: #fff;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background-color: #0056cc;
+        }
+        
+        .btn i {
+            font-size: 16px;
+        }
+        
+        /* Grid de festas */
+        .parties-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        /* Card de festa */
+        .party-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            transition: transform 0.2s;
+        }
+        
+        .party-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .party-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f2f2f7;
+        }
+        
+        .party-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        
+        .party-date {
+            font-size: 14px;
+            color: #86868b;
+            background-color: #f5f5f7;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .party-description {
+            color: #515154;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        /* Status de confirmação */
+        .confirmation-section {
+            margin-top: 24px;
+        }
+        
+        .confirmation-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: #1d1d1f;
+        }
+        
+        .confirmation-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            background-color: #f5f5f7;
+        }
+        
+        .confirmation-status.confirmed {
+            background-color: #e8f7ed;
+            color: #34c759;
+        }
+        
+        .confirmation-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            width: 100%;
+        }
+        
+        .confirm-btn {
+            background-color: #34c759;
+            color: white;
+        }
+        
+        .confirm-btn:hover {
+            background-color: #2ca84a;
+        }
+        
+        .cancel-btn {
+            background-color: #ff3b30;
+            color: white;
+            margin-top: 8px;
+        }
+        
+        .cancel-btn:hover {
+            background-color: #e02e24;
+        }
+        
+        .unavailable-btn {
+            background-color: #d2d2d7;
+            color: #86868b;
+            cursor: not-allowed;
+        }
+        
+        /* Lista de confirmados */
+        .confirmed-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        
+        .confirmed-person {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f5f5f7;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .confirmed-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #007aff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 12px;
+        }
+        
+        /* Estado vazio */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #86868b;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #d2d2d7;
+        }
+        
+        .empty-state p {
+            font-size: 18px;
+        }
+        
+        /* Ações da festa (apenas para criador) */
+        .party-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #f2f2f7;
+        }
+        
+        .delete-btn {
+            background-color: transparent;
+            color: #ff3b30;
+            border: 1px solid #ff3b30;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .delete-btn:hover {
+            background-color: rgba(255, 59, 48, 0.05);
+        }
+        
+        /* Rodapé */
+        footer {
+            text-align: center;
+            padding: 40px 20px 20px;
+            color: #86868b;
+            font-size: 14px;
+            margin-top: 40px;
+            border-top: 1px solid #e5e5e7;
+        }
+        
+        .counter {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 10px;
+        }
+        
+        .counter-item {
+            text-align: center;
+        }
+        
+        .counter-number {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        
+        .counter-label {
+            font-size: 14px;
+            color: #86868b;
+            margin-top: 4px;
+        }
+        
+        /* Responsivo */
+        @media (min-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr 2fr;
+            }
+            
+            .parties-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .logo {
+                font-size: 28px;
+            }
+            
+            .party-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .party-date {
+                align-self: flex-start;
+            }
+            
+            .user-status {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            
+            .logout-btn {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal de login -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h2 class="modal-title">Entrar nas festas</h2>
+            <p class="modal-subtitle">Digite seu nome para participar</p>
+            <input type="text" class="modal-input" id="userName" placeholder="Seu nome" maxlength="20">
+            <button class="modal-btn" id="loginBtn">Entrar</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-sun"></i>
+                Festas do verão
+            </div>
+            <p class="subtitle">Organize as festas com os amigos</p>
+        </header>
+
+        <!-- Status do usuário (aparece após login) -->
+        <div class="user-status" id="userStatus" style="display: none;">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">?</div>
+                <div class="user-name" id="displayName">Convidado</div>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Sair</button>
+        </div>
+
+        <main class="main-content">
+            <div>
+                <div class="section-title">
+                    <i class="fas fa-plus-circle"></i>
+                    Nova festa
+                </div>
+                
+                <div class="party-form" id="partyForm">
+                    <div class="form-group">
+                        <label for="party-name">Nome da festa</label>
+                        <input type="text" id="party-name" placeholder="Ex: Praia, Churrasco, Piscina...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="party-date">Data da festa</label>
+                        <input type="date" id="party-date">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="party-description">Descrição (opcional)</label>
+                        <textarea id="party-description" placeholder="Detalhes, local, horário..."></textarea>
+                    </div>
+                    
+                    <button class="btn" id="add-party">
+                        <i class="fas fa-plus"></i> Criar festa
+                    </button>
+                </div>
+                
+                <div class="party-form" style="margin-top: 20px;">
+                    <div class="section-title" style="font-size: 18px; margin-bottom: 16px;">
+                        <i class="fas fa-users"></i>
+                        Amigos online
+                    </div>
+                    <div id="friendsList"></div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="section-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Festas
+                </div>
+                
+                <div class="parties-grid" id="partiesList">
+                    <!-- Festas serão carregadas aqui -->
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <div class="counter">
+                <div class="counter-item">
+                    <div class="counter-number" id="totalParties">0</div>
+                    <div class="counter-label">Festas</div>
+                </div>
+                <div class="counter-item">
+                    <div class="counter-number" id="totalConfirmations">0</div>
+                    <div class="counter-label">Confirmações</div>
+                </div>
+            </div>
+            <p>Feito para organizar os melhores momentos com os amigos</p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuração do Supabase (você vai criar uma conta grátis)
+        // Vá para: https://supabase.com → Sign up (use GitHub, sem MFA obrigatório)
+        
+        const SUPABASE_URL = 'https://betdkihrfsrzzcvojqce.supabase.co'; // Substitua
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJldGRraWhyZnNyenpjdm9qcWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3ODcxMjcsImV4cCI6MjA4MDM2MzEyN30.g_AV3sZN3zxW1RIug81X-7xJISSRoC3Dmv9zfNl71cY'; // Substitua
+        
+        // Inicializar Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Estado da aplicação
+        let currentUser = null;
+        let parties = [];
+        let onlineUsers = new Map(); // Mapa de usuários online
+        
+        // Cores para avatares
+        const avatarColors = ['#007aff', '#34c759', '#ff9500', '#ff3b30', '#af52de', '#5856d6', '#ff2d55', '#5ac8fa'];
+        
+        // DOM elements
+        const loginModal = document.getElementById('loginModal');
+        const userStatus = document.getElementById('userStatus');
+        const userNameInput = document.getElementById('userName');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userAvatar = document.getElementById('userAvatar');
+        const displayName = document.getElementById('displayName');
+        const partyForm = document.getElementById('partyForm');
+        const addPartyBtn = document.getElementById('add-party');
+        const partiesList = document.getElementById('partiesList');
+        const totalPartiesEl = document.getElementById('totalParties');
+        const totalConfirmationsEl = document.getElementById('totalConfirmations');
+        const friendsList = document.getElementById('friendsList');
+        
+        // Inicializar aplicação
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar data mínima como hoje
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('party-date').setAttribute('min', today);
+            document.getElementById('party-date').value = today;
+            
+            // Verificar se já está logado
+            checkExistingUser();
+            
+            // Event listeners
+            loginBtn.addEventListener('click', handleLogin);
+            logoutBtn.addEventListener('click', handleLogout);
+            addPartyBtn.addEventListener('click', handleAddParty);
+            
+            // Permitir login com Enter
+            userNameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handleLogin();
+            });
+            
+            // Carregar festas
+            loadParties();
+            
+            // Observar mudanças nas festas em tempo real
+            setupRealtimeSubscription();
+            
+            // Manter usuário online
+            setInterval(updateUserPresence, 30000); // Atualizar a cada 30 segundos
+        });
+        
+        // Verificar usuário existente
+        function checkExistingUser() {
+            const savedUser = localStorage.getItem('partyUser');
+            if (savedUser) {
+                const userData = JSON.parse(savedUser);
+                currentUser = userData;
+                updateUIAfterLogin(userData.name);
+                updateUserPresence();
+            } else {
+                loginModal.classList.add('active');
+                userStatus.style.display = 'none';
+                partyForm.style.display = 'none';
+            }
+        }
+        
+        // Lidar com login
+        async function handleLogin() {
+            const userName = userNameInput.value.trim();
+            
+            if (!userName) {
+                alert('Por favor, digite seu nome!');
+                return;
+            }
+            
+            if (userName.length < 2) {
+                alert('O nome deve ter pelo menos 2 caracteres!');
+                return;
+            }
+            
+            // Gerar ID único para o usuário
+            const userId = generateUserId();
+            const userColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+            
+            // Criar objeto de usuário
+            currentUser = {
+                id: userId,
+                name: userName,
+                color: userColor,
+                lastSeen: new Date().toISOString()
+            };
+            
+            // Salvar no localStorage
+            localStorage.setItem('partyUser', JSON.stringify(currentUser));
+            
+            // Atualizar UI
+            updateUIAfterLogin(userName);
+            
+            // Registrar usuário online no Supabase
+            await updateUserPresence();
+            
+            // Fechar modal
+            loginModal.classList.remove('active');
+        }
+        
+        // Atualizar UI após login
+        function updateUIAfterLogin(userName) {
+            userStatus.style.display = 'flex';
+            partyForm.style.display = 'block';
+            
+            // Atualizar avatar e nome
+            const firstLetter = userName.charAt(0).toUpperCase();
+            userAvatar.textContent = firstLetter;
+            userAvatar.style.backgroundColor = currentUser.color;
+            displayName.textContent = userName;
+        }
+        
+        // Lidar com logout
+        function handleLogout() {
+            if (confirm('Tem certeza que deseja sair?')) {
+                // Remover do localStorage
+                localStorage.removeItem('partyUser');
+                
+                // Remover presença online
+                removeUserPresence();
+                
+                // Resetar estado
+                currentUser = null;
+                onlineUsers.clear();
+                
+                // Atualizar UI
+                loginModal.classList.add('active');
+                userStatus.style.display = 'none';
+                partyForm.style.display = 'none';
+                partiesList.innerHTML = '';
+                friendsList.innerHTML = '';
+                
+                // Resetar contadores
+                totalPartiesEl.textContent = '0';
+                totalConfirmationsEl.textContent = '0';
+            }
+        }
+        
+        // Gerar ID único para usuário
+        function generateUserId() {
+            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        // Atualizar presença do usuário
+        async function updateUserPresence() {
+            if (!currentUser) return;
+            
+            currentUser.lastSeen = new Date().toISOString();
+            
+            try {
+                // Usar uma tabela simples para presença online
+                await supabase
+                    .from('online_users')
+                    .upsert({
+                        user_id: currentUser.id,
+                        user_name: currentUser.name,
+                        user_color: currentUser.color,
+                        last_seen: currentUser.lastSeen
+                    }, { onConflict: 'user_id' });
+                
+                // Atualizar lista de amigos online
+                await loadOnlineUsers();
+            } catch (error) {
+                console.error('Erro ao atualizar presença:', error);
+            }
+        }
+        
+        // Remover presença do usuário
+        async function removeUserPresence() {
+            if (!currentUser) return;
+            
+            try {
+                await supabase
+                    .from('online_users')
+                    .delete()
+                    .eq('user_id', currentUser.id);
+            } catch (error) {
+                console.error('Erro ao remover presença:', error);
+            }
+        }
+        
+        // Carregar usuários online
+        async function loadOnlineUsers() {
+            if (!currentUser) return;
+            
+            try {
+                // Buscar usuários ativos nos últimos 2 minutos
+                const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+                
+                const { data, error } = await supabase
+                    .from('online_users')
+                    .select('*')
+                    .gt('last_seen', twoMinutesAgo);
+                
+                if (error) throw error;
+                
+                // Atualizar mapa de usuários online
+                onlineUsers.clear();
+                data.forEach(user => {
+                    if (user.user_id !== currentUser.id) {
+                        onlineUsers.set(user.user_id, user);
+                    }
+                });
+                
+                updateFriendsList();
+            } catch (error) {
+                console.error('Erro ao carregar usuários online:', error);
+            }
+        }
+        
+        // Atualizar lista de amigos
+        function updateFriendsList() {
+            if (!currentUser || onlineUsers.size === 0) {
+                friendsList.innerHTML = '<p style="color: #86868b; font-style: italic;">Nenhum amigo online no momento</p>';
+                return;
+            }
+            
+            let friendsHTML = '';
+            
+            onlineUsers.forEach(user => {
+                friendsHTML += `
+                    <div class="confirmed-person" style="margin-bottom: 8px;">
+                        <div class="confirmed-avatar" style="background-color: ${user.user_color || '#007aff'}">
+                            ${user.user_name.charAt(0).toUpperCase()}
+                        </div>
+                        <span>${user.user_name}</span>
+                    </div>
+                `;
+            });
+            
+            friendsList.innerHTML = friendsHTML;
+        }
+        
+        // Configurar inscrição em tempo real
+        function setupRealtimeSubscription() {
+            // Ouvir mudanças nas festas
+            supabase
+                .channel('parties_changes')
+                .on('postgres_changes', 
+                    { event: '*', schema: 'public', table: 'parties' },
+                    () => {
+                        loadParties();
+                    }
+                )
+                .subscribe();
+            
+            // Ouvir mudanças em usuários online
+            supabase
+                .channel('online_users_changes')
+                .on('postgres_changes',
+                    { event: '*', schema: 'public', table: 'online_users' },
+                    () => {
+                        loadOnlineUsers();
+                    }
+                )
+                .subscribe();
+        }
+        
+        // Carregar festas
+        async function loadParties() {
+            if (!currentUser) return;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('parties')
+                    .select('*')
+                    .order('date', { ascending: true });
+                
+                if (error) throw error;
+                
+                parties = data || [];
+                let totalConfirmations = 0;
+                
+                partiesList.innerHTML = '';
+                
+                if (parties.length === 0) {
+                    partiesList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-umbrella-beach"></i>
+                            <p>Nenhuma festa criada ainda</p>
+                        </div>
+                    `;
+                    updateCounters(0, 0);
+                    return;
+                }
+                
+                parties.forEach(party => {
+                    // Contar confirmações
+                    if (party.confirmed_users) {
+                        totalConfirmations += Object.keys(party.confirmed_users).length;
+                    }
+                    
+                    // Criar card da festa
+                    createPartyCard(party);
+                });
+                
+                updateCounters(parties.length, totalConfirmations);
+            } catch (error) {
+                console.error('Erro ao carregar festas:', error);
+                partiesList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Erro ao carregar festas</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Criar card de festa
+        function createPartyCard(party) {
+            const isConfirmed = party.confirmed_users && party.confirmed_users[currentUser.id];
+            const isCreator = party.created_by === currentUser.id;
+            
+            // Formatar data
+            const dateObj = new Date(party.date);
+            const formattedDate = dateObj.toLocaleDateString('pt-BR', { 
+                weekday: 'short', 
+                day: 'numeric', 
+                month: 'short' 
+            });
+            
+            // Lista de confirmados
+            let confirmedListHTML = '';
+            if (party.confirmed_users) {
+                for (const userId in party.confirmed_users) {
+                    const userName = party.confirmed_users[userId];
+                    const userColor = onlineUsers.get(userId)?.user_color || '#007aff';
+                    
+                    confirmedListHTML += `
+                        <div class="confirmed-person">
+                            <div class="confirmed-avatar" style="background-color: ${userColor}">
+                                ${userName.charAt(0).toUpperCase()}
+                            </div>
+                            <span>${userName}</span>
+                        </div>
+                    `;
+                }
+            }
+            
+            const partyCard = document.createElement('div');
+            partyCard.className = 'party-card';
+            partyCard.id = `party-${party.id}`;
+            
+            partyCard.innerHTML = `
+                <div class="party-header">
+                    <div class="party-name">${party.name}</div>
+                    <div class="party-date"><i class="far fa-calendar"></i> ${formattedDate}</div>
+                </div>
+                
+                ${party.description ? `<div class="party-description">${party.description}</div>` : ''}
+                
+                <div class="confirmation-section">
+                    <div class="confirmation-title">Confirmações</div>
+                    
+                    <div class="confirmation-status ${isConfirmed ? 'confirmed' : ''}">
+                        <i class="fas fa-${isConfirmed ? 'check-circle' : 'clock'}"></i>
+                        ${isConfirmed ? 'Você confirmou presença' : 'Você não confirmou'}
+                    </div>
+                    
+                    ${!isConfirmed ? `
+                        <button class="confirmation-btn confirm-btn" data-party-id="${party.id}">
+                            <i class="fas fa-check"></i> Confirmar presença
+                        </button>
+                    ` : `
+                        <button class="confirmation-btn cancel-btn" data-party-id="${party.id}">
+                            <i class="fas fa-times"></i> Cancelar confirmação
+                        </button>
+                    `}
+                    
+                    ${confirmedListHTML ? `
+                        <div class="confirmed-list">
+                            ${confirmedListHTML}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                ${isCreator ? `
+                    <div class="party-actions">
+                        <button class="delete-btn delete-party-btn" data-party-id="${party.id}">
+                            <i class="fas fa-trash"></i> Excluir festa
+                        </button>
+                    </div>
+                ` : ''}
+            `;
+            
+            partiesList.appendChild(partyCard);
+            
+            // Adicionar event listeners aos botões
+            const confirmBtn = partyCard.querySelector('.confirm-btn');
+            const cancelBtn = partyCard.querySelector('.cancel-btn');
+            const deleteBtn = partyCard.querySelector('.delete-party-btn');
+            
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', () => handleConfirmation(party.id, true));
+            }
+            
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => handleConfirmation(party.id, false));
+            }
+            
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => handleDeleteParty(party.id));
+            }
+        }
+        
+        // Adicionar nova festa
+        async function handleAddParty() {
+            if (!currentUser) {
+                alert('Você precisa estar logado para criar uma festa!');
+                return;
+            }
+            
+            const partyName = document.getElementById('party-name').value.trim();
+            const partyDate = document.getElementById('party-date').value;
+            const partyDescription = document.getElementById('party-description').value.trim();
+            
+            if (!partyName) {
+                alert('Por favor, digite um nome para a festa!');
+                return;
+            }
+            
+            if (!partyDate) {
+                alert('Por favor, selecione uma data para a festa!');
+                return;
+            }
+            
+            try {
+                // Adicionar festa ao Supabase
+                const { error } = await supabase
+                    .from('parties')
+                    .insert({
+                        name: partyName,
+                        date: partyDate,
+                        description: partyDescription,
+                        created_by: currentUser.id,
+                        created_by_name: currentUser.name,
+                        confirmed_users: {}
+                    });
+                
+                if (error) throw error;
+                
+                // Limpar formulário
+                document.getElementById('party-name').value = '';
+                document.getElementById('party-description').value = '';
+                
+                // Focar no nome da festa
+                document.getElementById('party-name').focus();
+                
+            } catch (error) {
+                console.error('Erro ao criar festa:', error);
+                alert('Erro ao criar festa. Tente novamente.');
+            }
+        }
+        
+        // Lidar com confirmação/cancelamento
+        async function handleConfirmation(partyId, confirm) {
+            if (!currentUser) return;
+            
+            try {
+                // Primeiro, buscar a festa atual
+                const { data: party, error: fetchError } = await supabase
+                    .from('parties')
+                    .select('confirmed_users')
+                    .eq('id', partyId)
+                    .single();
+                
+                if (fetchError) throw fetchError;
+                
+                // Atualizar confirmações
+                const updatedConfirmations = { ...party.confirmed_users };
+                
+                if (confirm) {
+                    updatedConfirmations[currentUser.id] = currentUser.name;
+                } else {
+                    delete updatedConfirmations[currentUser.id];
+                }
+                
+                // Atualizar no banco de dados
+                const { error: updateError } = await supabase
+                    .from('parties')
+                    .update({ confirmed_users: updatedConfirmations })
+                    .eq('id', partyId);
+                
+                if (updateError) throw updateError;
+                
+            } catch (error) {
+                console.error('Erro ao atualizar confirmação:', error);
+                alert('Erro ao atualizar. Tente novamente.');
+            }
+        }
+        
+        // Excluir festa
+        async function handleDeleteParty(partyId) {
+            if (!confirm('Tem certeza que deseja excluir esta festa?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('parties')
+                    .delete()
+                    .eq('id', partyId);
+                
+                if (error) throw error;
+                
+            } catch (error) {
+                console.error('Erro ao excluir festa:', error);
+                alert('Erro ao excluir festa. Tente novamente.');
+            }
+        }
+        
+        // Atualizar contadores
+        function updateCounters(totalParties, totalConfirmations) {
+            totalPartiesEl.textContent = totalParties;
+            totalConfirmationsEl.textContent = totalConfirmations;
+        }
+    </script>
+</body>
+</html>

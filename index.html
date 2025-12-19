@@ -700,6 +700,12 @@
             border: 2px solid rgba(28, 169, 201, 0.1);
             position: relative;
             overflow: hidden;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Animação apenas para cards novos */
+        .party-card.initial-load {
             animation: fadeInUp 0.6s ease-out;
         }
         
@@ -1392,6 +1398,8 @@
     let parties = [];
     let onlineUsers = new Map();
     let userColorsCache = new Map();
+    let renderedPartyIds = new Set(); // Rastrear quais festas já foram renderizadas
+    let isInitialLoad = true; // Flag para primeira carga
     
     // Cores para avatares
     const avatarColors = ['#FE6F5E', '#1CA9C9', '#40E0D0', '#F4A460', '#34C759', '#FF3B30', '#5856D6', '#FF9500'];
@@ -1571,6 +1579,8 @@
                 currentUser = null;
                 onlineUsers.clear();
                 userColorsCache.clear();
+                renderedPartyIds.clear();
+                isInitialLoad = true;
                 
                 // Atualizar UI
                 loginModal.classList.add('active');
@@ -1728,11 +1738,21 @@
                 .subscribe();
         }
         
-        // Atualizar display das festas
+        // Atualizar display das festas (otimizado para evitar re-renderização)
         async function updatePartiesDisplay() {
             let totalConfirmations = 0;
             
-            partiesGrid.innerHTML = '';
+            // Obter IDs das festas atuais
+            const currentPartyIds = new Set(parties.map(p => p.id));
+            
+            // Verificar se precisa limpar tudo (festas foram removidas)
+            const needsFullRender = [...renderedPartyIds].some(id => !currentPartyIds.has(id));
+            
+            if (needsFullRender) {
+                // Limpar tudo se alguma festa foi removida
+                partiesGrid.innerHTML = '';
+                renderedPartyIds.clear();
+            }
             
             if (!parties || parties.length === 0) {
                 partiesGrid.innerHTML = `
@@ -1743,6 +1763,7 @@
                     </div>
                 `;
                 updateCounters(0, 0);
+                renderedPartyIds.clear();
                 return;
             }
             
@@ -1752,18 +1773,117 @@
                 updateAvatarColors();
             });
             
-            // Renderizar cards imediatamente com cores padrão
+            // Renderizar ou atualizar cards
             parties.forEach(party => {
                 // Contar confirmações
                 if (party.confirmed_users) {
                     totalConfirmations += Object.keys(party.confirmed_users).length;
                 }
                 
-                // Criar card da festa
-                createPartyCard(party);
+                // Verificar se o card já existe
+                const existingCard = document.getElementById(`party-${party.id}`);
+                
+                if (existingCard) {
+                    // Card já existe - apenas atualizar conteúdo sem re-renderizar
+                    updatePartyCard(existingCard, party);
+                } else {
+                    // Card novo - criar e adicionar
+                    createPartyCard(party);
+                    renderedPartyIds.add(party.id);
+                }
             });
             
             updateCounters(parties.length, totalConfirmations);
+            
+            // Após primeira carga, desabilitar animações
+            if (isInitialLoad) {
+                setTimeout(() => {
+                    isInitialLoad = false;
+                }, 1000);
+            }
+        }
+        
+        // Atualizar card existente sem re-renderizar
+        function updatePartyCard(cardElement, party) {
+            const isConfirmed = currentUser && party.confirmed_users && party.confirmed_users[currentUser.id];
+            const isCreator = currentUser && party.created_by === currentUser.id;
+            
+            // Atualizar apenas a seção de confirmações
+            const confirmationSection = cardElement.querySelector('.confirmation-section');
+            if (!confirmationSection) return;
+            
+            // Lista de confirmados
+            let confirmedListHTML = '';
+            if (party.confirmed_users && Object.keys(party.confirmed_users).length > 0) {
+                for (const userId in party.confirmed_users) {
+                    const userName = party.confirmed_users[userId];
+                    const userColor = getUserColor(userId);
+                    const firstChar = userName.charAt(0);
+                    const avatarChar = /[\uD800-\uDFFF]/.test(firstChar) ? '😎' : firstChar.toUpperCase();
+                    const isOnline = isUserOnline(userId);
+                    const onlineClass = isOnline ? ' online' : '';
+                    
+                    confirmedListHTML += `
+                        <div class="confirmed-person">
+                            <div class="confirmed-avatar${onlineClass}" data-user-id="${userId}" style="background-color: ${userColor}">
+                                ${avatarChar}
+                            </div>
+                            <span>${userName}${isOnline ? ' ✅' : ''}</span>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Atualizar HTML da seção de confirmações
+            confirmationSection.innerHTML = `
+                <div class="confirmation-title">Confirmações</div>
+                
+                ${currentUser ? `
+                    <div class="confirmation-status ${isConfirmed ? 'confirmed' : ''}">
+                        <i class="ti ti-${isConfirmed ? 'check' : 'clock'}"></i>
+                        ${isConfirmed ? 'Você confirmou presença' : 'Você não confirmou'}
+                    </div>
+                ` : `
+                    <div class="confirmation-status">
+                        <i class="ti ti-users"></i>
+                        Entre com seu nome para confirmar presença
+                    </div>
+                `}
+                
+                ${currentUser ? `
+                    ${!isConfirmed ? `
+                        <button class="confirmation-btn confirm-btn" data-party-id="${party.id}">
+                            <i class="ti ti-check"></i> Confirmar presença
+                        </button>
+                    ` : `
+                        <button class="confirmation-btn cancel-btn" data-party-id="${party.id}">
+                            <i class="ti ti-x"></i> Cancelar confirmação
+                        </button>
+                    `}
+                ` : `
+                    <button class="confirmation-btn unavailable-btn" onclick="document.getElementById('loginModal').classList.add('active')">
+                        <i class="ti ti-login"></i> Entre para confirmar
+                    </button>
+                `}
+                
+                ${confirmedListHTML ? `
+                    <div class="confirmed-list">
+                        ${confirmedListHTML}
+                    </div>
+                ` : ''}
+            `;
+            
+            // Re-adicionar event listeners
+            const confirmBtn = confirmationSection.querySelector('.confirm-btn');
+            const cancelBtn = confirmationSection.querySelector('.cancel-btn');
+            
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', () => handleConfirmation(party.id, true));
+            }
+            
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => handleConfirmation(party.id, false));
+            }
         }
         
         // Carregar cores dos criadores das festas (otimizado)
@@ -1923,7 +2043,7 @@
             }
             
             const partyCard = document.createElement('div');
-            partyCard.className = 'party-card';
+            partyCard.className = isInitialLoad ? 'party-card initial-load' : 'party-card';
             partyCard.id = `party-${party.id}`;
             
             partyCard.innerHTML = `

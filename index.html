@@ -854,6 +854,147 @@
             box-shadow: 0 8px 20px rgba(52, 199, 89, 0.4);
         }
         
+        /* ===================================
+           CASINO-STYLE CELEBRATION EFFECTS
+        =================================== */
+        @keyframes confettiPop {
+            0% {
+                transform: translateY(0) scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-200px) scale(1) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes jackpotPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 20px rgba(52, 199, 89, 0);
+            }
+        }
+        
+        @keyframes sparkle {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(180deg);
+            }
+        }
+        
+        @keyframes coinFlip {
+            0% {
+                transform: translateY(0) rotateY(0deg);
+            }
+            50% {
+                transform: translateY(-30px) rotateY(180deg);
+            }
+            100% {
+                transform: translateY(0) rotateY(360deg);
+            }
+        }
+        
+        @keyframes slotMachineWin {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+            25% {
+                transform: scale(1.2) rotate(-5deg);
+            }
+            50% {
+                transform: scale(1.1) rotate(5deg);
+            }
+            75% {
+                transform: scale(1.2) rotate(-5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+        
+        @keyframes neonGlow {
+            0%, 100% {
+                text-shadow: 
+                    0 0 10px rgba(52, 199, 89, 0.8),
+                    0 0 20px rgba(52, 199, 89, 0.6),
+                    0 0 30px rgba(52, 199, 89, 0.4);
+            }
+            50% {
+                text-shadow: 
+                    0 0 20px rgba(52, 199, 89, 1),
+                    0 0 40px rgba(52, 199, 89, 0.8),
+                    0 0 60px rgba(52, 199, 89, 0.6);
+            }
+        }
+        
+        .confetti-piece {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 9999;
+            animation: confettiPop 1.5s ease-out forwards;
+        }
+        
+        .celebration-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+        }
+        
+        .jackpot-text {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-display);
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--color-success);
+            text-shadow: 
+                0 0 20px rgba(52, 199, 89, 0.8),
+                0 0 40px rgba(52, 199, 89, 0.6),
+                0 0 60px rgba(52, 199, 89, 0.4);
+            animation: slotMachineWin 0.6s ease-in-out, neonGlow 1s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 10000;
+            opacity: 0;
+        }
+        
+        .jackpot-text.show {
+            animation: slotMachineWin 0.6s ease-in-out, neonGlow 1s ease-in-out infinite, fadeOut 0.5s ease-out 1.5s forwards;
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1.5);
+            }
+        }
+        
+        .party-card.celebrating {
+            animation: jackpotPulse 0.6s ease-in-out 3;
+        }
+        
+        .confirmed-avatar.celebrating {
+            animation: coinFlip 0.8s ease-in-out;
+        }
+        
         .cancel-btn {
             background: linear-gradient(135deg, var(--color-danger) 0%, #E02E24 100%);
             color: var(--color-white);
@@ -1912,6 +2053,11 @@
                 
                 if (updateError) throw updateError;
                 
+                // 🎰 CASINO CELEBRATION - apenas quando confirmar!
+                if (confirm) {
+                    triggerCasinoCelebration(partyId);
+                }
+                
                 // Atualizar display imediatamente
                 const partyIndex = parties.findIndex(p => p.id === partyId);
                 if (partyIndex !== -1) {
@@ -1922,6 +2068,110 @@
             } catch (error) {
                 console.error('Erro ao atualizar confirmação:', error);
                 alert('Erro ao atualizar. Tente novamente.');
+            }
+        }
+        
+        // 🎰 CASINO-STYLE CELEBRATION FUNCTION
+        function triggerCasinoCelebration(partyId) {
+            const partyCard = document.getElementById(`party-${partyId}`);
+            if (!partyCard) return;
+            
+            // 1. Adicionar classe de celebração ao card
+            partyCard.classList.add('celebrating');
+            setTimeout(() => partyCard.classList.remove('celebrating'), 2000);
+            
+            // 2. Criar texto de JACKPOT
+            const jackpotText = document.createElement('div');
+            jackpotText.className = 'jackpot-text show';
+            jackpotText.textContent = '🎉 CONFIRMADO! 🎉';
+            document.body.appendChild(jackpotText);
+            setTimeout(() => jackpotText.remove(), 2000);
+            
+            // 3. Criar confetti explosion
+            createConfettiExplosion(partyCard);
+            
+            // 4. Vibração (se disponível)
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100, 50, 200]);
+            }
+        }
+        
+        // Função para criar explosão de confetti
+        function createConfettiExplosion(targetElement) {
+            const rect = targetElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const colors = [
+                '#FE6F5E', // coral
+                '#1CA9C9', // turquoise
+                '#40E0D0', // mint
+                '#F4A460', // sand
+                '#34C759', // success green
+                '#FF9500', // orange
+                '#5856D6', // purple
+                '#FF3B30'  // red
+            ];
+            
+            const shapes = ['●', '★', '■', '▲', '♦', '♥', '♣', '♠'];
+            
+            // Criar 50 peças de confetti
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-piece';
+                confetti.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+                confetti.style.color = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = centerX + 'px';
+                confetti.style.top = centerY + 'px';
+                confetti.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                
+                // Direção aleatória
+                const angle = (Math.random() * 360) * (Math.PI / 180);
+                const velocity = Math.random() * 200 + 100;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity - 200; // Bias para cima
+                
+                confetti.style.setProperty('--tx', tx + 'px');
+                confetti.style.setProperty('--ty', ty + 'px');
+                
+                // Animação customizada para cada peça
+                const duration = Math.random() * 0.5 + 1; // 1-1.5s
+                const delay = Math.random() * 0.1;
+                confetti.style.animationDuration = duration + 's';
+                confetti.style.animationDelay = delay + 's';
+                
+                document.body.appendChild(confetti);
+                
+                // Remover após animação
+                setTimeout(() => confetti.remove(), (duration + delay) * 1000);
+            }
+            
+            // Criar sparkles adicionais
+            createSparkles(centerX, centerY);
+        }
+        
+        // Função para criar sparkles (estrelinhas brilhantes)
+        function createSparkles(x, y) {
+            for (let i = 0; i < 20; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.textContent = '✨';
+                sparkle.style.position = 'fixed';
+                sparkle.style.left = x + 'px';
+                sparkle.style.top = y + 'px';
+                sparkle.style.fontSize = (Math.random() * 30 + 20) + 'px';
+                sparkle.style.pointerEvents = 'none';
+                sparkle.style.zIndex = '9999';
+                
+                const angle = (Math.random() * 360) * (Math.PI / 180);
+                const distance = Math.random() * 150 + 50;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                sparkle.style.animation = `sparkle ${Math.random() * 0.5 + 0.8}s ease-out forwards`;
+                sparkle.style.transform = `translate(${tx}px, ${ty}px)`;
+                
+                document.body.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 1300);
             }
         }
         

@@ -5,55 +5,224 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Festas do Verão</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont/tabler-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* ===================================
+           CSS VARIABLES - DESIGN TOKENS
+        =================================== */
+        :root {
+            /* Beach Color Palette */
+            --color-coral: #FE6F5E;
+            --color-coral-light: #FFB6AE;
+            --color-coral-dark: #E61801;
+            
+            --color-turquoise: #1CA9C9;
+            --color-turquoise-light: #5ACFE9;
+            --color-turquoise-dark: #127187;
+            
+            --color-mint: #40E0D0;
+            --color-mint-light: #9FEFE7;
+            --color-mint-dark: #21CDBC;
+            
+            --color-sand: #F4A460;
+            --color-sand-light: #FAD2B0;
+            --color-sand-dark: #D56B0F;
+            
+            /* Neutral Colors */
+            --color-white: #FFFFFF;
+            --color-cream: #FFF9F5;
+            --color-beige: #F5EDE4;
+            --color-gray-50: #FAFAFA;
+            --color-gray-100: #F5F5F5;
+            --color-gray-200: #EEEEEE;
+            --color-gray-300: #E0E0E0;
+            --color-gray-400: #BDBDBD;
+            --color-gray-500: #9E9E9E;
+            --color-gray-600: #757575;
+            --color-gray-700: #616161;
+            --color-gray-800: #424242;
+            --color-gray-900: #212121;
+            
+            /* Semantic Colors */
+            --color-success: #34C759;
+            --color-success-light: #E8F7ED;
+            --color-danger: #FF3B30;
+            --color-danger-light: #FFE5E4;
+            
+            /* Typography */
+            --font-display: 'Pacifico', cursive;
+            --font-body: 'Nunito', sans-serif;
+            
+            /* Font Sizes */
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 1.875rem;
+            --text-4xl: 2.25rem;
+            --text-5xl: 3rem;
+            
+            /* Spacing */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            --space-16: 4rem;
+            --space-20: 5rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            --radius-full: 9999px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-coral: 0 10px 30px -5px rgba(254, 111, 94, 0.3);
+            --shadow-turquoise: 0 10px 30px -5px rgba(28, 169, 201, 0.3);
+            
+            /* Transitions */
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* ===================================
+           GLOBAL STYLES
+        =================================== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         }
         
         body {
-            background-color: #f5f5f7;
-            color: #1d1d1f;
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, var(--color-cream) 0%, var(--color-beige) 100%);
+            color: var(--color-gray-800);
             min-height: 100vh;
-            line-height: 1.4;
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Animated Beach Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(254, 111, 94, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(28, 169, 201, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(64, 224, 208, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Wave decoration at bottom */
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%231CA9C9' fill-opacity='0.1' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+            pointer-events: none;
+            z-index: 0;
         }
         
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: var(--space-6);
+            position: relative;
+            z-index: 1;
         }
         
+        /* ===================================
+           HEADER STYLES
+        =================================== */
         header {
             text-align: center;
-            padding: 30px 20px;
+            padding: var(--space-12) var(--space-6);
+            margin-bottom: var(--space-8);
+            position: relative;
         }
         
         .logo {
-            font-size: 32px;
-            font-weight: 600;
-            color: #1d1d1f;
-            margin-bottom: 8px;
+            font-family: var(--font-display);
+            font-size: var(--text-5xl);
+            font-weight: 400;
+            background: linear-gradient(135deg, var(--color-coral) 0%, var(--color-turquoise) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-3);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: var(--space-4);
+            animation: fadeInDown 0.8s ease-out;
         }
         
         .logo i {
-            color: #007aff;
+            font-size: var(--text-4xl);
+            color: var(--color-coral);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .subtitle {
-            font-size: 18px;
-            color: #86868b;
+            font-size: var(--text-xl);
+            color: var(--color-gray-600);
             font-weight: 400;
+            animation: fadeIn 1s ease-out 0.3s both;
         }
         
-        /* Modal de login */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* ===================================
+           MODAL STYLES
+        =================================== */
         .modal {
             display: none;
             position: fixed;
@@ -61,10 +230,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.3s ease-out;
         }
         
         .modal.active {
@@ -72,94 +243,170 @@
         }
         
         .modal-content {
-            background-color: white;
-            border-radius: 12px;
-            padding: 32px;
+            background: linear-gradient(135deg, var(--color-white) 0%, var(--color-cream) 100%);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-10);
             width: 90%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 420px;
+            box-shadow: var(--shadow-xl), var(--shadow-coral);
+            border: 2px solid rgba(254, 111, 94, 0.1);
+            animation: slideUp 0.4s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(28, 169, 201, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
         
         .modal-title {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #1d1d1f;
+            font-family: var(--font-display);
+            font-size: var(--text-3xl);
+            font-weight: 400;
+            margin-bottom: var(--space-2);
+            background: linear-gradient(135deg, var(--color-coral) 0%, var(--color-turquoise) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
         }
         
         .modal-subtitle {
-            color: #86868b;
-            margin-bottom: 24px;
+            color: var(--color-gray-600);
+            margin-bottom: var(--space-8);
+            font-size: var(--text-base);
         }
         
         .modal-input {
             width: 100%;
-            padding: 14px 16px;
-            font-size: 16px;
-            border: 1px solid #d2d2d7;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            transition: all 0.2s;
+            padding: var(--space-4) var(--space-5);
+            font-size: var(--text-lg);
+            font-family: var(--font-body);
+            border: 2px solid var(--color-gray-200);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-5);
+            transition: all var(--transition-base);
+            background: var(--color-white);
         }
         
         .modal-input:focus {
             outline: none;
-            border-color: #007aff;
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+            border-color: var(--color-turquoise);
+            box-shadow: 0 0 0 4px rgba(28, 169, 201, 0.1);
+            transform: translateY(-2px);
         }
         
         .modal-btn {
             width: 100%;
-            padding: 14px;
-            background-color: #007aff;
-            color: white;
+            padding: var(--space-4) var(--space-6);
+            background: linear-gradient(135deg, var(--color-coral) 0%, var(--color-turquoise) 100%);
+            color: var(--color-white);
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
+            border-radius: var(--radius-xl);
+            font-size: var(--text-lg);
+            font-weight: 600;
+            font-family: var(--font-body);
             cursor: pointer;
-            transition: background-color 0.2s;
-            margin-top: 10px;
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-coral);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .modal-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .modal-btn:hover::before {
+            left: 100%;
         }
         
         .modal-btn:hover {
-            background-color: #0056cc;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl), var(--shadow-coral);
         }
         
-        /* Status do usuário */
+        .modal-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* ===================================
+           USER STATUS STYLES
+        =================================== */
         .user-status {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: white;
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--space-5) var(--space-6);
+            margin-bottom: var(--space-8);
+            box-shadow: var(--shadow-md);
+            border: 2px solid rgba(28, 169, 201, 0.1);
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
         
         .user-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: var(--space-4);
         }
         
         .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #007aff;
-            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--color-coral) 0%, var(--color-turquoise) 100%);
+            color: var(--color-white);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            font-size: 18px;
+            font-weight: 700;
+            font-size: var(--text-xl);
+            box-shadow: var(--shadow-md);
         }
         
         .user-name {
-            font-weight: 500;
-            font-size: 16px;
+            font-weight: 600;
+            font-size: var(--text-lg);
+            color: var(--color-gray-800);
             max-width: 200px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -167,376 +414,239 @@
         }
         
         .logout-btn {
-            background-color: transparent;
-            color: #ff3b30;
-            border: 1px solid #ff3b30;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
+            background: transparent;
+            color: var(--color-danger);
+            border: 2px solid var(--color-danger);
+            padding: var(--space-2) var(--space-5);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            font-family: var(--font-body);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--transition-base);
         }
         
         .logout-btn:hover {
-            background-color: rgba(255, 59, 48, 0.05);
+            background: var(--color-danger);
+            color: var(--color-white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
         
-        /* Layout principal - GRID */
+        /* ===================================
+           LAYOUT STYLES
+        =================================== */
         .main-layout {
             display: grid;
             grid-template-columns: 1fr 2fr;
-            gap: 30px;
+            gap: var(--space-8);
         }
         
-        /* Sidebar */
+        /* ===================================
+           SIDEBAR STYLES
+        =================================== */
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: var(--space-6);
         }
         
         .sidebar-section {
-            background-color: #fff;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            box-shadow: var(--shadow-lg);
+            border: 2px solid rgba(28, 169, 201, 0.1);
+            transition: all var(--transition-base);
+            animation: fadeInLeft 0.6s ease-out;
+        }
+        
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .sidebar-section:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl), var(--shadow-turquoise);
         }
         
         .section-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #1d1d1f;
-            margin-bottom: 20px;
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            color: var(--color-gray-800);
+            margin-bottom: var(--space-6);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: var(--space-3);
         }
         
         .section-title i {
-            color: #007aff;
+            color: var(--color-turquoise);
+            font-size: var(--text-xl);
         }
         
-        /* Formulário de nova festa */
+        /* ===================================
+           FORM STYLES
+        =================================== */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: var(--space-6);
         }
         
         label {
             display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #1d1d1f;
-            margin-bottom: 8px;
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--color-gray-700);
+            margin-bottom: var(--space-2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        input[type="text"], input[type="date"], textarea {
+        input[type="text"], 
+        input[type="date"], 
+        textarea {
             width: 100%;
-            padding: 12px 16px;
-            font-size: 16px;
-            border: 1px solid #d2d2d7;
-            border-radius: 8px;
-            background-color: #fff;
-            transition: all 0.2s;
+            padding: var(--space-4) var(--space-5);
+            font-size: var(--text-base);
+            font-family: var(--font-body);
+            border: 2px solid var(--color-gray-200);
+            border-radius: var(--radius-lg);
+            background: var(--color-white);
+            transition: all var(--transition-base);
         }
         
         textarea {
             resize: vertical;
-            min-height: 80px;
+            min-height: 100px;
         }
         
-        input:focus, textarea:focus {
+        input:focus, 
+        textarea:focus {
             outline: none;
-            border-color: #007aff;
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+            border-color: var(--color-turquoise);
+            box-shadow: 0 0 0 4px rgba(28, 169, 201, 0.1);
+            transform: translateY(-2px);
         }
         
         .btn {
-            background-color: #007aff;
-            color: #fff;
+            background: linear-gradient(135deg, var(--color-coral) 0%, var(--color-turquoise) 100%);
+            color: var(--color-white);
             border: none;
-            padding: 14px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
+            padding: var(--space-4) var(--space-6);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-base);
+            font-weight: 600;
+            font-family: var(--font-body);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--transition-base);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: var(--space-2);
             width: 100%;
+            box-shadow: var(--shadow-coral);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
         }
         
         .btn:hover {
-            background-color: #0056cc;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl), var(--shadow-coral);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
         }
         
         .btn i {
-            font-size: 16px;
+            font-size: var(--text-lg);
         }
         
-        /* Amigos online */
+        /* ===================================
+           FRIENDS LIST STYLES
+        =================================== */
         .friends-container {
-            max-height: 300px;
+            max-height: 350px;
             overflow-y: auto;
         }
         
         .friends-container::-webkit-scrollbar {
-            width: 4px;
+            width: 6px;
         }
         
         .friends-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
+            background: var(--color-gray-100);
+            border-radius: var(--radius-full);
         }
         
         .friends-container::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 10px;
+            background: var(--color-turquoise);
+            border-radius: var(--radius-full);
         }
         
-        /* Área principal - GRID DE FESTAS */
-        .main-area {
-            display: flex;
-            flex-direction: column;
+        .friends-container::-webkit-scrollbar-thumb:hover {
+            background: var(--color-turquoise-dark);
         }
         
-        /* GRID DE FESTAS - RESPONSIVO */
-        .parties-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-            flex: 1;
-        }
-        
-        /* Card de festa */
-        .party-card {
-            background-color: #fff;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-        
-        .party-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-        }
-        
-        .party-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #f2f2f7;
-        }
-        
-        .party-name {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1d1d1f;
-            line-height: 1.3;
-        }
-        
-        .party-date {
-            font-size: 13px;
-            color: #86868b;
-            background-color: #f5f5f7;
-            padding: 6px 12px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        
-        .party-description {
-            color: #515154;
-            margin-bottom: 20px;
-            line-height: 1.5;
-            flex: 1;
-            word-break: break-word;
-        }
-        
-        /* Estilo para links na descrição */
-        .party-description a {
-            color: #007aff;
-            text-decoration: none;
-            border-bottom: 1px solid rgba(0, 122, 255, 0.3);
-            transition: all 0.2s;
-            word-break: break-all;
-        }
-        
-        .party-description a:hover {
-            color: #0056cc;
-            border-bottom-color: #0056cc;
-        }
-        
-        /* Status de confirmação */
-        .confirmation-section {
-            margin-top: auto;
-        }
-        
-        .confirmation-title {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 16px;
-            color: #1d1d1f;
-        }
-        
-        .confirmation-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 16px;
-            background-color: #f5f5f7;
-        }
-        
-        .confirmation-status.confirmed {
-            background-color: #e8f7ed;
-            color: #34c759;
-        }
-        
-        .confirmation-btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            width: 100%;
-        }
-        
-        .confirm-btn {
-            background-color: #34c759;
-            color: white;
-        }
-        
-        .confirm-btn:hover {
-            background-color: #2ca84a;
-        }
-        
-        .cancel-btn {
-            background-color: #ff3b30;
-            color: white;
-            margin-top: 8px;
-        }
-        
-        .cancel-btn:hover {
-            background-color: #e02e24;
-        }
-        
-        .unavailable-btn {
-            background-color: #d2d2d7;
-            color: #86868b;
-            cursor: not-allowed;
-        }
-        
-        /* Lista de confirmados */
-        .confirmed-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 16px;
-        }
-        
-        .confirmed-person {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background-color: #f5f5f7;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-        }
-        
-        .confirmed-avatar {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background-color: #007aff;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 500;
-            font-size: 11px;
-            flex-shrink: 0;
-        }
-        
-        .confirmed-avatar.online {
-            box-shadow: 0 0 0 2px #34c759;
-        }
-        
-        /* Ações da festa (apenas para criador) */
-        .party-actions {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-            padding-top: 16px;
-            border-top: 1px solid #f2f2f7;
-        }
-        
-        .delete-btn {
-            background-color: transparent;
-            color: #ff3b30;
-            border: 1px solid #ff3b30;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .delete-btn:hover {
-            background-color: rgba(255, 59, 48, 0.05);
-        }
-        
-        /* Amigos online */
         .friends-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: var(--space-3);
         }
         
         .friend-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px;
-            border-radius: 8px;
-            background-color: #f5f5f7;
-            transition: all 0.2s;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-lg);
+            background: var(--color-gray-50);
+            transition: all var(--transition-base);
+            border: 2px solid transparent;
         }
         
         .friend-item:hover {
-            background-color: #e8e8ed;
+            background: var(--color-white);
+            border-color: var(--color-turquoise-light);
+            transform: translateX(4px);
         }
         
         .friend-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #007aff;
-            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--color-coral) 0%, var(--color-turquoise) 100%);
+            color: var(--color-white);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 500;
-            font-size: 14px;
+            font-weight: 600;
+            font-size: var(--text-sm);
             flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
         }
         
         .friend-info {
@@ -545,72 +655,386 @@
         }
         
         .friend-name {
-            font-weight: 500;
-            font-size: 14px;
-            color: #1d1d1f;
+            font-weight: 600;
+            font-size: var(--text-sm);
+            color: var(--color-gray-800);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
         
         .friend-status {
-            font-size: 11px;
-            color: #86868b;
+            font-size: var(--text-xs);
+            color: var(--color-success);
+            font-weight: 500;
         }
         
-        /* Estado vazio */
+        /* ===================================
+           PARTIES GRID STYLES
+        =================================== */
+        .main-area {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .parties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--space-6);
+            flex: 1;
+        }
+        
+        /* ===================================
+           PARTY CARD STYLES
+        =================================== */
+        .party-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-slow);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 2px solid rgba(28, 169, 201, 0.1);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .party-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-coral) 0%, var(--color-turquoise) 100%);
+        }
+        
+        .party-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-xl), var(--shadow-turquoise);
+            border-color: var(--color-turquoise);
+        }
+        
+        .party-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-5);
+            padding-bottom: var(--space-5);
+            border-bottom: 2px solid var(--color-gray-100);
+        }
+        
+        .party-name {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            color: var(--color-gray-900);
+            line-height: 1.3;
+            flex: 1;
+        }
+        
+        .party-date {
+            font-size: var(--text-sm);
+            color: var(--color-turquoise-dark);
+            background: linear-gradient(135deg, rgba(28, 169, 201, 0.1) 0%, rgba(64, 224, 208, 0.1) 100%);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-weight: 600;
+            border: 1px solid rgba(28, 169, 201, 0.2);
+        }
+        
+        .party-date i {
+            color: var(--color-turquoise);
+        }
+        
+        .party-description {
+            color: var(--color-gray-700);
+            margin-bottom: var(--space-6);
+            line-height: 1.6;
+            flex: 1;
+            word-break: break-word;
+            font-size: var(--text-base);
+        }
+        
+        .party-description a {
+            color: var(--color-turquoise);
+            text-decoration: none;
+            border-bottom: 2px solid var(--color-turquoise-light);
+            transition: all var(--transition-base);
+            word-break: break-all;
+            font-weight: 600;
+        }
+        
+        .party-description a:hover {
+            color: var(--color-turquoise-dark);
+            border-bottom-color: var(--color-turquoise-dark);
+        }
+        
+        /* ===================================
+           CONFIRMATION STYLES
+        =================================== */
+        .confirmation-section {
+            margin-top: auto;
+        }
+        
+        .confirmation-title {
+            font-size: var(--text-lg);
+            font-weight: 700;
+            margin-bottom: var(--space-4);
+            color: var(--color-gray-800);
+        }
+        
+        .confirmation-status {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-full);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            margin-bottom: var(--space-4);
+            background: var(--color-gray-100);
+            color: var(--color-gray-600);
+            border: 2px solid var(--color-gray-200);
+        }
+        
+        .confirmation-status.confirmed {
+            background: var(--color-success-light);
+            color: var(--color-success);
+            border-color: var(--color-success);
+        }
+        
+        .confirmation-status i {
+            font-size: var(--text-base);
+        }
+        
+        .confirmation-btn {
+            padding: var(--space-3) var(--space-5);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            font-family: var(--font-body);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            border: none;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+        }
+        
+        .confirm-btn {
+            background: linear-gradient(135deg, var(--color-success) 0%, #2CA84A 100%);
+            color: var(--color-white);
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+        }
+        
+        .confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52, 199, 89, 0.4);
+        }
+        
+        .cancel-btn {
+            background: linear-gradient(135deg, var(--color-danger) 0%, #E02E24 100%);
+            color: var(--color-white);
+            margin-top: var(--space-2);
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+        }
+        
+        .cancel-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 59, 48, 0.4);
+        }
+        
+        .unavailable-btn {
+            background: var(--color-gray-200);
+            color: var(--color-gray-500);
+            cursor: not-allowed;
+        }
+        
+        .unavailable-btn:hover {
+            transform: none;
+        }
+        
+        /* ===================================
+           CONFIRMED LIST STYLES
+        =================================== */
+        .confirmed-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+            margin-top: var(--space-5);
+        }
+        
+        .confirmed-person {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            background: var(--color-gray-50);
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: var(--text-sm);
+            border: 2px solid var(--color-gray-200);
+            transition: all var(--transition-base);
+        }
+        
+        .confirmed-person:hover {
+            background: var(--color-white);
+            border-color: var(--color-turquoise-light);
+            transform: translateY(-2px);
+        }
+        
+        .confirmed-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--color-coral) 0%, var(--color-turquoise) 100%);
+            color: var(--color-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: var(--text-xs);
+            flex-shrink: 0;
+        }
+        
+        .confirmed-avatar.online {
+            box-shadow: 0 0 0 3px var(--color-success);
+        }
+        
+        /* ===================================
+           PARTY ACTIONS STYLES
+        =================================== */
+        .party-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: var(--space-6);
+            padding-top: var(--space-5);
+            border-top: 2px solid var(--color-gray-100);
+        }
+        
+        .delete-btn {
+            background: transparent;
+            color: var(--color-danger);
+            border: 2px solid var(--color-danger);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            font-family: var(--font-body);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .delete-btn:hover {
+            background: var(--color-danger);
+            color: var(--color-white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* ===================================
+           EMPTY STATE STYLES
+        =================================== */
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
-            color: #86868b;
+            padding: var(--space-20) var(--space-6);
+            color: var(--color-gray-500);
             grid-column: 1 / -1;
         }
         
         .empty-state i {
-            font-size: 48px;
-            margin-bottom: 16px;
-            color: #d2d2d7;
+            font-size: 64px;
+            margin-bottom: var(--space-6);
+            color: var(--color-turquoise-light);
+            opacity: 0.5;
         }
         
         .empty-state p {
-            font-size: 18px;
+            font-size: var(--text-xl);
+            font-weight: 500;
         }
         
-        /* Rodapé */
+        /* ===================================
+           FOOTER STYLES
+        =================================== */
         footer {
             text-align: center;
-            padding: 40px 20px 20px;
-            color: #86868b;
-            font-size: 14px;
-            margin-top: 40px;
-            border-top: 1px solid #e5e5e7;
+            padding: var(--space-16) var(--space-6) var(--space-8);
+            color: var(--color-gray-600);
+            font-size: var(--text-base);
+            margin-top: var(--space-16);
+            border-top: 2px solid rgba(28, 169, 201, 0.1);
             grid-column: 1 / -1;
+            position: relative;
         }
         
         .counter {
             display: flex;
             justify-content: center;
-            gap: 40px;
-            margin-top: 10px;
+            gap: var(--space-16);
+            margin-bottom: var(--space-8);
         }
         
         .counter-item {
             text-align: center;
+            padding: var(--space-6);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            min-width: 140px;
+            box-shadow: var(--shadow-md);
+            border: 2px solid rgba(28, 169, 201, 0.1);
+            transition: all var(--transition-base);
+        }
+        
+        .counter-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
         }
         
         .counter-number {
-            font-size: 28px;
-            font-weight: 600;
-            color: #1d1d1f;
+            font-size: var(--text-4xl);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-coral) 0%, var(--color-turquoise) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .counter-label {
-            font-size: 14px;
-            color: #86868b;
-            margin-top: 4px;
+            font-size: var(--text-base);
+            color: var(--color-gray-600);
+            margin-top: var(--space-2);
+            font-weight: 600;
         }
         
-        /* Responsivo */
+        /* ===================================
+           RESPONSIVE STYLES
+        =================================== */
         @media (max-width: 1100px) {
             .main-layout {
                 grid-template-columns: 1fr;
@@ -630,12 +1054,24 @@
         }
         
         @media (max-width: 768px) {
+            :root {
+                --text-5xl: 2.5rem;
+                --text-4xl: 2rem;
+                --text-3xl: 1.75rem;
+            }
+            
             .container {
-                padding: 16px;
+                padding: var(--space-4);
+            }
+            
+            header {
+                padding: var(--space-8) var(--space-4);
             }
             
             .logo {
-                font-size: 28px;
+                font-size: var(--text-4xl);
+                flex-direction: column;
+                gap: var(--space-2);
             }
             
             .parties-grid {
@@ -644,7 +1080,7 @@
             
             .party-header {
                 flex-direction: column;
-                gap: 10px;
+                gap: var(--space-3);
                 align-items: flex-start;
             }
             
@@ -654,26 +1090,35 @@
             
             .user-status {
                 flex-direction: column;
-                gap: 12px;
+                gap: var(--space-4);
                 align-items: flex-start;
             }
             
             .logout-btn {
                 align-self: flex-end;
             }
+            
+            .counter {
+                flex-direction: column;
+                gap: var(--space-4);
+            }
+            
+            .counter-item {
+                min-width: auto;
+            }
         }
         
         @media (max-width: 480px) {
             .modal-content {
-                padding: 24px;
+                padding: var(--space-8);
             }
             
             .party-card {
-                padding: 20px;
+                padding: var(--space-6);
             }
             
             .sidebar-section {
-                padding: 20px;
+                padding: var(--space-6);
             }
         }
     </style>
@@ -685,8 +1130,8 @@
             <h2 class="modal-title">Entrar nas festas</h2>
             <p class="modal-subtitle">Digite seu nome para participar</p>
             <input type="text" class="modal-input" id="userName" placeholder="Seu nome" maxlength="30">
-            <p style="font-size: 12px; color: #86868b; margin-top: -10px; margin-bottom: 15px;">
-                Pode usar emojis!
+            <p style="font-size: var(--text-sm); color: var(--color-gray-500); margin-top: calc(var(--space-3) * -1); margin-bottom: var(--space-4);">
+                Pode usar emojis! 🌊🏖️☀️
             </p>
             <button class="modal-btn" id="loginBtn">Entrar</button>
         </div>
@@ -695,10 +1140,10 @@
     <div class="container">
         <header>
             <div class="logo">
-                <i class="fas fa-sun"></i>
+                <i class="ti ti-sun"></i>
                 Festas do verão
             </div>
-            <p class="subtitle">Organize as festas com os amigos</p>
+            <p class="subtitle">Organize as festas com os amigos 🏖️</p>
         </header>
 
         <!-- Status do usuário (aparece após login) -->
@@ -715,7 +1160,7 @@
             <div class="sidebar">
                 <div class="sidebar-section">
                     <div class="section-title">
-                        <i class="fas fa-plus-circle"></i>
+                        <i class="ti ti-beach"></i>
                         Nova festa
                     </div>
                     
@@ -735,18 +1180,18 @@
                     </div>
                     
                     <button class="btn" id="add-party">
-                        <i class="fas fa-plus"></i> Criar festa
+                        <i class="ti ti-plus"></i> Criar festa
                     </button>
                 </div>
                 
                 <div class="sidebar-section">
-                    <div class="section-title" style="font-size: 18px; margin-bottom: 16px;">
-                        <i class="fas fa-users"></i>
+                    <div class="section-title" style="font-size: var(--text-xl); margin-bottom: var(--space-4);">
+                        <i class="ti ti-users"></i>
                         Amigos online
                     </div>
                     <div class="friends-container" id="friendsList">
                         <div class="friends-list">
-                            <p style="color: #86868b; font-style: italic; text-align: center; padding: 20px;">
+                            <p style="color: var(--color-gray-500); font-style: italic; text-align: center; padding: var(--space-6);">
                                 Nenhum amigo online no momento
                             </p>
                         </div>
@@ -757,9 +1202,9 @@
             <!-- Área principal com GRID -->
             <div class="main-area">
                 <div class="section-title">
-                    <i class="fas fa-calendar-alt"></i>
+                    <i class="ti ti-calendar-event"></i>
                     Festas
-                    <span id="totalParties" style="font-size: 16px; color: #86868b; margin-left: 8px;">(0)</span>
+                    <span id="totalParties" style="font-size: var(--text-lg); color: var(--color-gray-500); margin-left: var(--space-2);">(0)</span>
                 </div>
                 
                 <!-- Grid de festas -->
@@ -780,7 +1225,7 @@
                     <div class="counter-label">Confirmações</div>
                 </div>
             </div>
-            <p>Feito para organizar os melhores momentos do verão</p>
+            <p>Feito para organizar os melhores momentos do verão ☀️🌊</p>
         </footer>
     </div>
 
@@ -808,7 +1253,7 @@
     let userColorsCache = new Map();
     
     // Cores para avatares
-    const avatarColors = ['#007aff', '#34c759', '#ff9500', '#ff3b30', '#af52de', '#5856d6', '#ff2d55', '#5ac8fa'];
+    const avatarColors = ['#FE6F5E', '#1CA9C9', '#40E0D0', '#F4A460', '#34C759', '#FF3B30', '#5856D6', '#FF9500'];
     
     // DOM elements
     const loginModal = document.getElementById('loginModal');
@@ -990,7 +1435,7 @@
                 loginModal.classList.add('active');
                 userStatus.style.display = 'none';
                 partiesGrid.innerHTML = '';
-                friendsList.innerHTML = '<p style="color: #86868b; font-style: italic; text-align: center; padding: 20px;">Nenhum amigo online no momento</p>';
+                friendsList.innerHTML = '<p style="color: var(--color-gray-500); font-style: italic; text-align: center; padding: var(--space-6);">Nenhum amigo online no momento</p>';
                 
                 // Recarregar festas (versão pública)
                 loadPartiesPublic();
@@ -1059,7 +1504,7 @@
                         if (user.user_id !== currentUser.id) {
                             onlineUsers.set(user.user_id, user);
                             // Armazenar cor do usuário no cache
-                            userColorsCache.set(user.user_id, user.user_color || '#007aff');
+                            userColorsCache.set(user.user_id, user.user_color || '#1CA9C9');
                         }
                     });
                 }
@@ -1076,7 +1521,7 @@
             if (!currentUser || onlineUsers.size === 0) {
                 friendsList.innerHTML = `
                     <div class="friends-list">
-                        <p style="color: #86868b; font-style: italic; text-align: center; padding: 20px;">
+                        <p style="color: var(--color-gray-500); font-style: italic; text-align: center; padding: var(--space-6);">
                             Nenhum amigo online no momento
                         </p>
                     </div>
@@ -1092,7 +1537,7 @@
                 
                 friendsHTML += `
                     <div class="friend-item">
-                        <div class="friend-avatar" style="background-color: ${user.user_color || '#007aff'}">
+                        <div class="friend-avatar" style="background-color: ${user.user_color || '#1CA9C9'}">
                             ${avatarChar}
                         </div>
                         <div class="friend-info">
@@ -1147,9 +1592,9 @@
             if (!parties || parties.length === 0) {
                 partiesGrid.innerHTML = `
                     <div class="empty-state">
-                        <i class="fas fa-umbrella-beach"></i>
+                        <i class="ti ti-beach"></i>
                         <p>Nenhuma festa criada ainda</p>
-                        ${!currentUser ? '<p style="margin-top: 10px; font-size: 14px;">Entre com seu nome para criar uma festa!</p>' : ''}
+                        ${!currentUser ? '<p style="margin-top: var(--space-3); font-size: var(--text-base);">Entre com seu nome para criar uma festa!</p>' : ''}
                     </div>
                 `;
                 updateCounters(0, 0);
@@ -1189,7 +1634,7 @@
                 // Armazenar cores no cache
                 if (data) {
                     data.forEach(user => {
-                        userColorsCache.set(user.user_id, user.user_color || '#007aff');
+                        userColorsCache.set(user.user_id, user.user_color || '#1CA9C9');
                     });
                 }
             } catch (error) {
@@ -1217,7 +1662,7 @@
             }
             
             // Cor padrão
-            return '#007aff';
+            return '#1CA9C9';
         }
         
         // Função para verificar se usuário está online
@@ -1311,7 +1756,7 @@
             partyCard.innerHTML = `
                 <div class="party-header">
                     <div class="party-name">${escapeHtml(party.name)}</div>
-                    <div class="party-date"><i class="far fa-calendar"></i> ${formattedDate}</div>
+                    <div class="party-date"><i class="ti ti-calendar-event"></i> ${formattedDate}</div>
                 </div>
                 
                 ${party.description ? `<div class="party-description">${formatTextWithLinks(party.description)}</div>` : ''}
@@ -1321,12 +1766,12 @@
                     
                     ${currentUser ? `
                         <div class="confirmation-status ${isConfirmed ? 'confirmed' : ''}">
-                            <i class="fas fa-${isConfirmed ? 'check-circle' : 'clock'}"></i>
+                            <i class="ti ti-${isConfirmed ? 'check' : 'clock'}"></i>
                             ${isConfirmed ? 'Você confirmou presença' : 'Você não confirmou'}
                         </div>
                     ` : `
                         <div class="confirmation-status">
-                            <i class="fas fa-users"></i>
+                            <i class="ti ti-users"></i>
                             Entre com seu nome para confirmar presença
                         </div>
                     `}
@@ -1334,16 +1779,16 @@
                     ${currentUser ? `
                         ${!isConfirmed ? `
                             <button class="confirmation-btn confirm-btn" data-party-id="${party.id}">
-                                <i class="fas fa-check"></i> Confirmar presença
+                                <i class="ti ti-check"></i> Confirmar presença
                             </button>
                         ` : `
                             <button class="confirmation-btn cancel-btn" data-party-id="${party.id}">
-                                <i class="fas fa-times"></i> Cancelar confirmação
+                                <i class="ti ti-x"></i> Cancelar confirmação
                             </button>
                         `}
                     ` : `
                         <button class="confirmation-btn unavailable-btn" onclick="document.getElementById('loginModal').classList.add('active')">
-                            <i class="fas fa-sign-in-alt"></i> Entre para confirmar
+                            <i class="ti ti-login"></i> Entre para confirmar
                         </button>
                     `}
                     
@@ -1357,7 +1802,7 @@
                 ${currentUser && isCreator ? `
                     <div class="party-actions">
                         <button class="delete-btn delete-party-btn" data-party-id="${party.id}">
-                            <i class="fas fa-trash"></i> Excluir festa
+                            <i class="ti ti-trash"></i> Excluir festa
                         </button>
                     </div>
                 ` : ''}
